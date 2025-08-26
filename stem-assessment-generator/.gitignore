@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+venv/
+ENV/
+.DS_Store
+.vscode/
+*.db
+*.log
+data/uploads/*
+data/vectordb/*
+!data/uploads/.gitkeep
+!data/vectordb/.gitkeep
