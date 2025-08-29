@@ -1,3 +1,5 @@
+# Ignore environment files
 *.env
 *.env.*
 stem-assessment-generator/.env.example
+stem-assessment-generator/test.py

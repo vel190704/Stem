@@ -12,3 +12,16 @@ python-dotenv==1.0.0
 tiktoken==0.5.2
 jinja2==3.1.3
 httpx==0.27.0
+reportlab==4.0.9
+python-docx==1.1.0
+markdown2==2.4.10
+pdfplumber==0.10.3
+pymupdf==1.23.8
+textstat==0.7.3
+scikit-learn>=1.3.2
+numpy>=1.25.0
+
+# Optional optimization dependencies
+redis==5.0.1  # For distributed caching (optional)
+asyncio-throttle==1.0.2  # For advanced rate limiting (optional)
+psutil==5.9.6  # For memory monitoring (optional)

@@ -1,159 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STEM Assessment Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Performance optimizations */
+        html {
+            scroll-behavior: smooth;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            overflow-x: hidden;
         }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
+
+        /* Loading skeletons */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
         }
-        
-        .header {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
-        
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-        
-        .form-section {
-            padding: 40px;
-        }
-        
-        .upload-area {
-            border: 3px dashed #ddd;
-            border-radius: 10px;
-            padding: 40px;
-            text-align: center;
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .upload-area:hover {
-            border-color: #4CAF50;
-            background-color: #f9f9f9;
-        }
-        
-        .upload-area.dragover {
-            border-color: #4CAF50;
-            background-color: #e8f5e8;
-        }
-        
-        .upload-icon {
-            font-size: 3em;
-            color: #ddd;
-            margin-bottom: 20px;
-        }
-        
-        .file-input {
-            display: none;
-        }
-        
-        .upload-text {
-            font-size: 1.2em;
-            color: #666;
-            margin-bottom: 10px;
-        }
-        
-        .upload-subtext {
-            font-size: 0.9em;
-            color: #999;
-        }
-        
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .form-group {
+
+        .chart-loading {
             display: flex;
-            flex-direction: column;
-        }
-        
-        .form-group label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #333;
-        }
-        
-        .form-group select,
-        .form-group input {
-            padding: 12px;
-            border: 2px solid #ddd;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            background: #f9f9f9;
             border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
         }
-        
-        .form-group select:focus,
-        .form-group input:focus {
-            outline: none;
-            border-color: #4CAF50;
+
+        .chart-container {
+            min-height: 200px;
+            transition: opacity 0.3s ease-in-out;
         }
-        
-        .generate-btn {
-            width: 100%;
-            padding: 15px;
+
+        .chart-container.loading {
+            opacity: 0.5;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gradient-green {
             background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
         }
-        
-        .generate-btn:hover {
+
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .upload-area {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .upload-area:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
-        
-        .generate-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
+
+        .upload-area.dragover {
+            transform: scale(1.02);
+            border-color: #4CAF50;
+            background-color: rgba(76, 175, 80, 0.1);
         }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
+
+        .question-card {
+            transition: all 0.3s ease;
         }
-        
+
+        .question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
         .spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #4CAF50;
@@ -161,182 +116,384 @@
             width: 50px;
             height: 50px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
-        .results {
-            display: none;
-            padding: 40px;
-            background: #f8f9fa;
+
+        .progress-bar {
+            transition: width 0.3s ease-in-out;
         }
-        
-        .question-card {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+
+        .copy-btn {
+            transition: all 0.2s ease;
         }
-        
-        .question-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+
+        .copy-btn:hover {
+            transform: scale(1.05);
         }
-        
-        .question-number {
-            background: #4CAF50;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-        
-        .difficulty-badge {
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.8em;
-            font-weight: 600;
-        }
-        
-        .difficulty-easy { background: #d4edda; color: #155724; }
-        .difficulty-medium { background: #fff3cd; color: #856404; }
-        .difficulty-hard { background: #f8d7da; color: #721c24; }
-        
-        .question-text {
-            font-size: 1.1em;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-        
-        .options {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .option {
-            padding: 10px 15px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            border: 2px solid #eee;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .option:hover {
-            background: #f0f0f0;
-        }
-        
-        .option.correct {
+
+        .option-hover:hover {
+            background-color: rgba(76, 175, 80, 0.1);
             border-color: #4CAF50;
-            background: #e8f5e8;
         }
-        
-        .option.incorrect {
-            border-color: #f44336;
-            background: #ffebee;
+
+        .misconception-indicator {
+            position: relative;
         }
-        
-        .explanation {
-            margin-top: 15px;
-            padding: 15px;
-            background: #e3f2fd;
-            border-radius: 8px;
-            border-left: 4px solid #2196F3;
+
+        .misconception-indicator:hover::after {
+            content: attr(data-misconception);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 10;
         }
-        
-        .error {
-            display: none;
-            padding: 15px;
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            border-radius: 8px;
-            color: #721c24;
-            margin-top: 20px;
+
+        .difficulty-badge {
+            animation: pulse 2s infinite;
         }
-        
-        @media (max-width: 768px) {
-            .options-grid {
-                grid-template-columns: 1fr;
+
+        .results-summary {
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+        }
+
+        .stats-card {
+            transition: transform 0.2s ease;
+        }
+
+        .stats-card:hover {
+            transform: scale(1.05);
+        }
+
+        .error-enhanced {
+            white-space: pre-line;
+        }
+
+        .streaming-progress {
+            background: linear-gradient(90deg, #4CAF50 0%, #45a049 50%, #4CAF50 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
             }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .form-section {
-                padding: 20px;
+
+            100% {
+                background-position: 200% 0;
             }
         }
     </style>
+
+    <!-- Chart.js for analytics visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🧬 STEM Assessment Generator</h1>
-            <p>Upload your educational content and generate high-quality assessment questions</p>
-        </div>
-        
-        <div class="form-section">
-            <form id="uploadForm" enctype="multipart/form-data">
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon">📄</div>
-                    <div class="upload-text">Drop your PDF here or click to browse</div>
-                    <div class="upload-subtext">Supports PDF files up to 10MB</div>
-                    <input type="file" id="fileInput" class="file-input" accept=".pdf" required>
-                </div>
-                
-                <div class="options-grid">
-                    <div class="form-group">
-                        <label for="numQuestions">Number of Questions</label>
-                        <select id="numQuestions" name="num_questions">
-                            <option value="3">3 Questions</option>
-                            <option value="5" selected>5 Questions</option>
-                            <option value="8">8 Questions</option>
-                            <option value="10">10 Questions</option>
-                        </select>
+
+<body class="gradient-bg min-h-screen">
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <header class="text-center mb-8 animate-fade-in">
+            <div class="bg-white rounded-3xl shadow-2xl p-8 glass-effect">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                    🧬 STEM Assessment Generator
+                </h1>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Upload your educational content and generate high-quality assessment questions powered by AI
+                </p>
+            </div>
+        </header>
+
+        <!-- Upload Section -->
+        <section id="uploadSection" class="mb-8 animate-slide-up">
+            <div class="bg-white rounded-3xl shadow-2xl p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Upload Your Document</h2>
+
+                <!-- File Upload Area -->
+                <div id="uploadArea"
+                    class="upload-area border-3 border-dashed border-gray-300 rounded-2xl p-12 text-center cursor-pointer">
+                    <div class="upload-content">
+                        <div class="text-6xl mb-4" id="uploadIcon">📄</div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2" id="uploadText">
+                            Drop your PDF here or click to browse
+                        </h3>
+                        <p class="text-gray-500" id="uploadSubtext">
+                            Supports PDF files up to 10MB
+                        </p>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="difficulty">Difficulty Level</label>
-                        <select id="difficulty" name="difficulty">
-                            <option value="easy">Easy</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="hard">Hard</option>
-                        </select>
+                    <input type="file" id="fileInput" class="hidden" accept=".pdf" required>
+                </div>
+
+                <!-- Progress Bar -->
+                <div id="progressContainer" class="hidden mt-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-gray-700" id="progressText">Uploading...</span>
+                        <span class="text-sm text-gray-500" id="progressPercent">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div id="progressBar" class="gradient-green h-3 rounded-full progress-bar" style="width: 0%">
+                        </div>
                     </div>
                 </div>
-                
-                <button type="submit" class="generate-btn" id="generateBtn">
-                    Generate Assessment Questions
-                </button>
-            </form>
-            
-            <div class="error" id="errorMessage"></div>
+
+                <!-- Configuration Options -->
+                <div id="configSection" class="hidden mt-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Configuration</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="numQuestions" class="block text-sm font-medium text-gray-700 mb-2">
+                                Number of Questions
+                            </label>
+                            <select id="numQuestions"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                <option value="3">3 Questions</option>
+                                <option value="5" selected>5 Questions</option>
+                                <option value="8">8 Questions</option>
+                                <option value="10">10 Questions</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="difficulty" class="block text-sm font-medium text-gray-700 mb-2">
+                                Difficulty Level
+                            </label>
+                            <select id="difficulty"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                <option value="easy">Easy</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button id="generateBtn"
+                        class="hidden w-full mt-6 px-6 py-4 gradient-green text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
+                        🚀 Generate Assessment Questions
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Section -->
+        <section id="loadingSection" class="hidden mb-8">
+            <div class="bg-white rounded-3xl shadow-2xl p-8 text-center">
+                <div class="spinner mx-auto mb-4"></div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2" id="loadingTitle">Processing your document...</h3>
+                <p class="text-gray-600" id="loadingMessage">This may take 30-60 seconds</p>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="hidden animate-fade-in">
+            <div class="bg-white rounded-3xl shadow-2xl p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Generated Assessment Questions</h2>
+                    <button onclick="startOver()"
+                        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
+                        New Assessment
+                    </button>
+                </div>
+
+                <div id="questionsContainer" class="space-y-6">
+                    <!-- Questions will be dynamically inserted here -->
+                </div>
+
+                <!-- Analytics Button -->
+                <div class="mt-8 text-center">
+                    <button id="showAnalyticsBtn" onclick="assessmentGenerator.showAnalytics()"
+                        class="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors font-medium">
+                        📊 Show Analytics & Performance Dashboard
+                    </button>
+                </div>
+
+                <!-- Export Section -->
+                <div id="exportSection" class="mt-8 p-6 bg-gray-50 rounded-xl border">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">📤 Export Questions</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="exportFormat" class="block text-sm font-medium text-gray-700 mb-2">Export
+                                Format</label>
+                            <select id="exportFormat"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="pdf-teacher">PDF (Teacher Version)</option>
+                                <option value="pdf-student">PDF (Student Version)</option>
+                                <option value="json">JSON (LMS Compatible)</option>
+                                <option value="docx">Word Document</option>
+                                <option value="txt">Plain Text</option>
+                                <option value="moodle">Moodle XML</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="exportQuestions()"
+                                class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors font-medium">
+                                📥 Download Export
+                            </button>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="previewExport()"
+                                class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium">
+                                👁️ Preview
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Export Options -->
+                    <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="includeExplanations" checked class="mr-2">
+                            <span class="text-sm">Include Explanations</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="includeDifficulty" checked class="mr-2">
+                            <span class="text-sm">Show Difficulty</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="randomizeOrder" class="mr-2">
+                            <span class="text-sm">Randomize Order</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="separateAnswerKey" checked class="mr-2">
+                            <span class="text-sm">Separate Answer Key</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Analytics Section -->
+                <div id="analyticsSection" class="hidden mt-8 p-6 bg-gray-50 rounded-xl border">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">📊 Quality Analytics</h3>
+
+                    <!-- Analytics Summary -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-white p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-blue-600" id="avgQualityScore">--</div>
+                            <div class="text-sm text-gray-600">Avg Quality Score</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-green-600" id="strongDistractors">--</div>
+                            <div class="text-sm text-gray-600">Strong Distractors</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-purple-600" id="conceptsCovered">--</div>
+                            <div class="text-sm text-gray-600">Concepts Covered</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-orange-600" id="generationTime">--</div>
+                            <div class="text-sm text-gray-600">Generation Time (s)</div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-4 rounded-lg">
+                            <h4 class="font-medium text-gray-800 mb-3">Difficulty Distribution</h4>
+                            <div class="chart-container" style="position: relative; height: 200px; width: 100%; max-width: 300px; margin: 0 auto;">
+                                <canvas id="difficultyChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg">
+                            <h4 class="font-medium text-gray-800 mb-3">Distractor Quality</h4>
+                            <div class="chart-container" style="position: relative; height: 200px; width: 100%; max-width: 300px; margin: 0 auto;">
+                                <canvas id="qualityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quality Improvement -->
+                    <div class="mt-6">
+                        <h4 class="font-medium text-gray-800 mb-3">Quality Improvement</h4>
+                        <div id="lowQualityQuestions" class="space-y-2">
+                            <!-- Low quality questions will be listed here -->
+                        </div>
+                        <button onclick="regenerateLowQuality()"
+                            class="mt-3 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors">
+                            🔄 Regenerate Low Quality Questions
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Error Alert -->
+        <div id="errorAlert"
+            class="hidden fixed top-4 right-4 max-w-sm bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg z-50">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <span class="text-red-500">⚠️</span>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium" id="errorMessage">An error occurred</p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <button onclick="hideError()" class="text-red-500 hover:text-red-700">
+                        <span class="sr-only">Close</span>
+                        ✕
+                    </button>
+                </div>
+            </div>
         </div>
-        
-        <div class="loading" id="loadingSection">
-            <div class="spinner"></div>
-            <p>Analyzing your document and generating questions...</p>
-            <p style="font-size: 0.9em; color: #666; margin-top: 10px;">This may take 30-60 seconds</p>
+
+        <!-- Info Alert -->
+        <div id="infoAlert"
+            class="hidden fixed top-4 right-4 max-w-sm bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-lg shadow-lg z-50">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <span class="text-blue-500">ℹ️</span>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium" id="infoMessage">Processing...</p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <button onclick="hideInfo()" class="text-blue-500 hover:text-blue-700">
+                        <span class="sr-only">Close</span>
+                        ✕
+                    </button>
+                </div>
+            </div>
         </div>
-        
-        <div class="results" id="resultsSection">
-            <h2 style="margin-bottom: 30px; color: #333;">Generated Assessment Questions</h2>
-            <div id="questionsContainer"></div>
-            
-            <button onclick="startOver()" class="generate-btn" style="margin-top: 30px;">
-                Generate New Assessment
-            </button>
+
+        <!-- Success Alert -->
+        <div id="successAlert"
+            class="hidden fixed top-4 right-4 max-w-sm bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg z-50">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <span class="text-green-500">✅</span>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium" id="successMessage">Success!</p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <button onclick="hideSuccess()" class="text-green-500 hover:text-green-700">
+                        <span class="sr-only">Close</span>
+                        ✕
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <script src="/static/app.js"></script>
+
+    <!-- Footer -->
+    <footer class="text-center text-white text-opacity-75 py-8">
+        <p>&copy; 2025 STEM Assessment Generator. Powered by AI.</p>
+    </footer>
+
+    <script src="app.js"></script>
 </body>
+
 </html>
